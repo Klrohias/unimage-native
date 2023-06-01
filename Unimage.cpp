@@ -234,7 +234,7 @@ bool Unimage::loadImageWebP(uint8_t* data, uint32_t length)
 
     LoadRawImage(imageData, width, height, getFormatByChannels(channels));
 
-    freeWebpData(imageData);
+    free(imageData);
 
     return true;
 }

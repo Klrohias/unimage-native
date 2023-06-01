@@ -13,6 +13,4 @@ bool IsWebPFormat(const uint8_t* data, uint32_t length);
 
 uint8_t* loadWebpFromMemory(uint8_t* data, uint32_t size, int* width, int* height, int* channels, ErrorHandler* errorHandler);
 
-void freeWebpData(uint8_t* data);
-
 #endif //UNIMAGE_WEBP_HPP
