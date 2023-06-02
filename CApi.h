@@ -17,7 +17,7 @@ extern "C" {
 #elif
 #define UNIMAGE_API __declspec(dllimport)
 #endif
-#elif
+#else
 #define UNIMAGE_API
 #endif
 
