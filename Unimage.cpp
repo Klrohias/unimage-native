@@ -11,8 +11,11 @@
 #include "loader/LibJpegTurbo.hpp"
 #include "loader/WebP.hpp"
 
+const char* ERROR_STR_NOT_LOADED = "image is not loaded";
+const char* ERROR_STR_OVERFLOW = "range exceeds image size";
+
 template<int PixelSize = 3>
-void Scale(const uint8_t* srcBuffer, uint8_t* destBuffer, uint32_t srcWidth, uint32_t srcHeight, uint32_t destWidth, uint32_t destHeight)
+void scaleImage(const uint8_t* srcBuffer, uint8_t* destBuffer, uint32_t srcWidth, uint32_t srcHeight, uint32_t destWidth, uint32_t destHeight)
 {
     float scaleX, scaleY;
     scaleX = (float) srcWidth / (float) destWidth;
@@ -35,7 +38,7 @@ void Scale(const uint8_t* srcBuffer, uint8_t* destBuffer, uint32_t srcWidth, uin
     }
 }
 
-uint32_t getPixelSize(UnimageFormat format)
+int32_t getPixelSize(UnimageFormat format)
 {
     switch (format)
     {
@@ -55,6 +58,7 @@ UnimageFormat getFormatByChannels(int channels)
     }
 }
 
+
 Unimage::Unimage() = default;
 
 Unimage::~Unimage()
@@ -73,7 +77,134 @@ void Unimage::releaseImage()
     _format = None;
 }
 
-void Unimage::LoadRawImage(uint8_t* data, uint32_t width, uint32_t height, UnimageFormat format)
+bool Unimage::copyFrom(Unimage* unimage)
+{
+    if (unimage->_imageBuffer == nullptr)
+    {
+        _errorHandler.setError(ERROR_STR_NOT_LOADED);
+        return false;
+    }
+
+    releaseImage();
+
+    loadRawImage(unimage->_imageBuffer, unimage->_width, unimage->_height, unimage->_format);
+
+    return true;
+}
+
+bool Unimage::copyToMemory(void* buffer)
+{
+    if (!_imageBuffer)
+    {
+        _errorHandler.setError(ERROR_STR_NOT_LOADED);
+        return false;
+    }
+
+    uint32_t bufferSize = getPixelSize(_format) * _width * _height;
+    memcpy(buffer, _imageBuffer, bufferSize);
+
+    return true;
+}
+
+const std::string& Unimage::getErrorMessage() const
+{
+    return _errorHandler.getError();
+}
+
+int32_t Unimage::getWidth() const
+{
+    return _width;
+}
+
+int32_t Unimage::getHeight() const
+{
+    return _height;
+}
+
+UnimageFormat Unimage::getFormat() const
+{
+    return _format;
+}
+
+uint8_t* Unimage::getBuffer() const
+{
+    return _imageBuffer;
+}
+
+bool Unimage::resize(int32_t width, int32_t height)
+{
+    if (!_imageBuffer)
+    {
+        _errorHandler.setError(ERROR_STR_NOT_LOADED);
+        return false;
+    }
+
+    uint32_t bufferSize = getPixelSize(_format) * width * height;
+    auto* buffer = static_cast<uint8_t*>(malloc(bufferSize));
+
+    switch (_format)
+    {
+    case None:break;
+    case RGB:
+    {
+        scaleImage<3>(_imageBuffer, buffer, _width, _height, width, height);
+        break;
+    }
+    case RGBA:
+    {
+        scaleImage<4>(_imageBuffer, buffer, _width, _height, width, height);
+        break;
+    }
+    }
+
+    free(_imageBuffer);
+    _imageBuffer = buffer;
+    _width = width;
+    _height = height;
+
+    return true;
+}
+
+bool Unimage::clip(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    auto pixelSize = getPixelSize(_format);
+    auto* newBuffer = static_cast<uint8_t*>(malloc(width * height * pixelSize));
+
+    int32_t srcStrideSize = _width * pixelSize;
+    int32_t newStrideSize = width * pixelSize;
+
+    int32_t startLine = _height - y - height;
+    int32_t endLine = _height - y;
+    int32_t startPixel = x;
+    int32_t endPixel = x + width;
+
+    if (startLine < 0 || startLine > _height ||
+        endLine < 0 || endLine > _height ||
+        startPixel < 0 || startPixel > _width ||
+        endPixel < 0 || endPixel > _width)
+    {
+        _errorHandler.setError(ERROR_STR_OVERFLOW);
+        return false;
+    }
+
+    for (int iy = 0; iy < height; iy++)
+    {
+        memcpy(newBuffer + newStrideSize * iy, _imageBuffer + srcStrideSize * (iy + startLine) + x * pixelSize, newStrideSize);
+    }
+
+    auto format = _format;
+    
+    releaseImage();
+
+    _width = width;
+    _height = height;
+    _format = format;
+    _imageBuffer = newBuffer;
+
+    return true;
+}
+
+void Unimage::loadRawImage(uint8_t* data, int32_t width, int32_t height, UnimageFormat format)
 {
     releaseImage();
 
@@ -87,85 +218,17 @@ void Unimage::LoadRawImage(uint8_t* data, uint32_t width, uint32_t height, Unima
     memcpy(_imageBuffer, data, bufferSize);
 }
 
-bool Unimage::LoadImage(uint8_t* data, uint32_t len)
+bool Unimage::loadImage(uint8_t* data, uint32_t length)
 {
-    if (IsJpegFormat(data, len))
+    if (IsJpegFormat(data, length))
     {
-        return loadImageJpeg(data, len);
+        return loadImageJpeg(data, length);
     }
-    if (IsWebPFormat(data, len))
+    if (IsWebPFormat(data, length))
     {
-        return loadImageWebP(data, len);
+        return loadImageWebP(data, length);
     }
-    return loadImageStb(data, len);
-}
-
-uint32_t Unimage::GetWidth() const
-{
-    return _width;
-}
-
-uint32_t Unimage::GetHeight() const
-{
-    return _height;
-}
-
-UnimageFormat Unimage::GetFormat() const
-{
-    return _format;
-}
-
-bool Unimage::CopyTo(void* buffer)
-{
-    if (!_imageBuffer)
-    {
-        _errorHandler.setError("image is not loaded");
-        return false;
-    }
-
-    uint32_t bufferSize = getPixelSize(_format) * _width * _height;
-    memcpy(buffer, _imageBuffer, bufferSize);
-
-    return true;
-}
-
-bool Unimage::Resize(uint32_t width, uint32_t height)
-{
-    if (!_imageBuffer)
-    {
-        _errorHandler.setError("image is not loaded");
-        return false;
-    }
-
-    uint32_t bufferSize = getPixelSize(_format) * width * height;
-    auto* buffer = static_cast<uint8_t*>(malloc(bufferSize));
-
-    switch (_format)
-    {
-    case None:break;
-    case RGB:
-    {
-        Scale<3>(_imageBuffer, buffer, _width, _height, width, height);
-        break;
-    }
-    case RGBA:
-    {
-        Scale<4>(_imageBuffer, buffer, _width, _height, width, height);
-        break;
-    }
-    }
-
-    free(_imageBuffer);
-    _imageBuffer = buffer;
-    _width = width;
-    _height = height;
-
-    return true;
-}
-
-const std::string& Unimage::GetErrorMessage() const
-{
-    return _errorHandler.getError();
+    return loadImageStb(data, length);
 }
 
 bool Unimage::loadImageStb(uint8_t* data, uint32_t length)
@@ -213,7 +276,7 @@ bool Unimage::loadImageJpeg(uint8_t* data, uint32_t length)
         return false;
     }
 
-    LoadRawImage(imageData, width, height, getFormatByChannels(channels));
+    loadRawImage(imageData, width, height, getFormatByChannels(channels));
 
     free(imageData);
 
@@ -232,7 +295,7 @@ bool Unimage::loadImageWebP(uint8_t* data, uint32_t length)
         return false;
     }
 
-    LoadRawImage(imageData, width, height, getFormatByChannels(channels));
+    loadRawImage(imageData, width, height, getFormatByChannels(channels));
 
     free(imageData);
 

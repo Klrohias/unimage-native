@@ -12,29 +12,29 @@ void* unimage_create()
     return new Unimage;
 }
 
-uint8_t unimage_resize(void* handle, uint32_t width, uint32_t height)
+uint8_t unimage_resize(void* handle, int32_t width, int32_t height)
 {
-    return _TypedHandle->Resize(width, height);
+    return _TypedHandle->resize(width, height);
 }
 
-uint8_t unimage_copy_to(void* handle, void* buffer)
+uint8_t unimage_copy_to_memory(void* handle, void* buffer)
 {
-    return _TypedHandle->CopyTo(buffer);
+    return _TypedHandle->copyToMemory(buffer);
 }
 
 uint8_t unimage_get_format(void* handle)
 {
-    return _TypedHandle->GetFormat();
+    return _TypedHandle->getFormat();
 }
 
-uint32_t unimage_get_height(void* handle)
+int32_t unimage_get_height(void* handle)
 {
-    return _TypedHandle->GetHeight();
+    return _TypedHandle->getHeight();
 }
 
-uint32_t unimage_get_width(void* handle)
+int32_t unimage_get_width(void* handle)
 {
-    return _TypedHandle->GetWidth();
+    return _TypedHandle->getWidth();
 }
 
 void unimage_free(void* handle)
@@ -42,17 +42,32 @@ void unimage_free(void* handle)
     delete _TypedHandle;
 }
 
-void unimage_load_raw(void* handle, uint8_t* data, uint32_t width, uint32_t height, uint8_t format)
+void unimage_load_raw(void* handle, uint8_t* data, int32_t width, int32_t height, uint8_t format)
 {
-    _TypedHandle->LoadRawImage(data, width, height, static_cast<UnimageFormat>(format));
+    _TypedHandle->loadRawImage(data, width, height, static_cast<UnimageFormat>(format));
 }
 
 uint8_t unimage_load(void* handle, uint8_t* data, uint32_t length)
 {
-    return _TypedHandle->LoadImage(data, length);
+    return _TypedHandle->loadImage(data, length);
 }
 
 const char* unimage_get_error_message(void* handle)
 {
-    return _TypedHandle->GetErrorMessage().c_str();
+    return _TypedHandle->getErrorMessage().c_str();
+}
+
+uint8_t* unimage_get_buffer(void* handle)
+{
+    return _TypedHandle->getBuffer();
+}
+
+uint8_t unimage_copy_from(void* handle, void* unimage)
+{
+    return _TypedHandle->copyFrom(static_cast<Unimage*>(unimage));
+}
+
+uint8_t unimage_clip(void* handle, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    return _TypedHandle->clip(x, y, width, height);
 }

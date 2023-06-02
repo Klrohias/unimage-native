@@ -20,8 +20,8 @@ class Unimage
 {
     uint8_t* _imageBuffer{nullptr};
     UnimageFormat _format{None};
-    uint32_t _width{0};
-    uint32_t _height{0};
+    int32_t _width{0};
+    int32_t _height{0};
     ErrorHandler _errorHandler{};
 
     void releaseImage();
@@ -37,22 +37,27 @@ public:
 
     ~Unimage();
 
-    void LoadRawImage(uint8_t* data, uint32_t width, uint32_t height, UnimageFormat format);
+    void loadRawImage(uint8_t* data, int32_t width, int32_t height, UnimageFormat format);
 
-    bool LoadImage(uint8_t* data, uint32_t length);
+    bool loadImage(uint8_t* data, uint32_t length);
 
-    uint32_t GetWidth() const;
+    int32_t getWidth() const;
 
-    uint32_t GetHeight() const;
+    int32_t getHeight() const;
 
-    UnimageFormat GetFormat() const;
+    UnimageFormat getFormat() const;
 
-    bool CopyTo(void* buffer);
+    uint8_t* getBuffer() const;
 
-    bool Resize(uint32_t width, uint32_t height);
+    const std::string& getErrorMessage() const;
 
-    const std::string& GetErrorMessage() const;
+    bool copyToMemory(void* buffer);
 
+    bool copyFrom(Unimage* unimage);
+
+    bool resize(int32_t width, int32_t height);
+
+    bool clip(int32_t x, int32_t y, int32_t width, int32_t height);
 };
 
 
