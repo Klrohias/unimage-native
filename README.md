@@ -77,7 +77,7 @@ popd
 # Build for x86_64
 mkdir build-x86_64
 pushd build-x86_64
-cmake .. -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86_64-android -DANDROID_ABI=x86_64 -DVCPKG_CMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_NAME=Android -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=/path/to/ndk/build/cmake/android.toolchain.cmake -DCMAKE_MAKE_PROGRAM=/path/to/ndk/prebuilt/windows-x86_64/bin/make.exe -G "Unix Makefiles"
+cmake .. -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-android -DANDROID_ABI=x86_64 -DVCPKG_CMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_NAME=Android -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=/path/to/ndk/build/cmake/android.toolchain.cmake -DCMAKE_MAKE_PROGRAM=/path/to/ndk/prebuilt/windows-x86_64/bin/make.exe -G "Unix Makefiles"
 /path/to/ndk/prebuilt/windows-x86_64/bin/make.exe
 popd
 ```
