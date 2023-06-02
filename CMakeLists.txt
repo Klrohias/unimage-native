@@ -18,7 +18,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(LIBRARY_LIBJPEG_NAME libjpeg-turbo::turbojpeg)
 endif()
 if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    set(LIBRARY_TYPE OBJECT)
+    set(LIBRARY_TYPE STATIC)
 endif()
 
 add_library(${LIBRARY_NAME} ${LIBRARY_TYPE} loader/StbImpl.cpp loader/StbImpl.hpp Unimage.cpp Unimage.hpp CApi.cpp
