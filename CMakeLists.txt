@@ -19,6 +19,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     set(LIBRARY_TYPE STATIC)
+    
     # enable bitcode
     set(CMAKE_CXX_FLAGS -fembed-bitcode)
     set(CMAKE_C_FLAGS -fembed-bitcode)
@@ -28,7 +29,18 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE} src/loader/StbImpl.cpp src/loader/St
         src/CApi.h src/loader/WebP.cpp src/loader/WebP.hpp src/utils/StaticForLoop.hpp src/loader/LibJpegTurbo.cpp src/loader/LibJpegTurbo.hpp 
 	src/ErrorHandler.cpp src/ErrorHandler.hpp)
 
-target_include_directories(${LIBRARY_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+    # link
+    message("Building for iOS")
+    
+    add_custom_command(
+        TARGET ${LIBRARY_NAME}
+        POST_BUILD
+        COMMAND sh ${CMAKE_SOURCE_DIR}/scripts/ios-link.sh ${VCPKG_INSTALLED_DIR}/../
+    )
+endif()
+
+target_include_directories(${LIBRARY_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 target_link_libraries(${LIBRARY_NAME} PRIVATE ${LIBRARY_LIBJPEG_NAME})
 target_link_libraries(${LIBRARY_NAME} PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
