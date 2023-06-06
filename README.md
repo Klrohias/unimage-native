@@ -5,9 +5,19 @@ It can load `png`/`jpeg`/`webp`/`bmp`/`tga`/`gif` in to memory, and provides som
 # Building
 ### 1. Install dependencies
 ```shell
-./vcpkg install stb
-./vcpkg install libwebp
-./vcpkg install libjpeg-turbo
+vcpkg install stb:[triplet]
+vcpkg install libwebp:[triplet]
+vcpkg install libjpeg-turbo:[triplet]
+```
+Replace `[triplet]` with the triplet that you want to build for.  
+
+**If you want to build for iOS:**  
+```shell
+cp ./scripts/arm64-ios-bitcode.cmake /path/to/vcpkg/triplets/community/
+
+vcpkg install stb:arm64-ios-bitcode
+vcpkg install libwebp:arm64-ios-bitcode
+vcpkg install libjpeg-turbo:arm64-ios-bitcode
 ```
 
 ### 2. Generate for special platform:  
@@ -44,7 +54,7 @@ make
 cd /path/to/project
 mkdir build
 cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=arm64-ios -DVCPKG_CMAKE_SYSTEM_NAME=iOS -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DVCPKG_OSX_ARCHITECTURES=arm64
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=arm64-ios-bitcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64
 make
 ```
 
