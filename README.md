@@ -1,5 +1,5 @@
 # Unimage Native
-Used by [unimage-unity](https://github.com/Klrohias/unimage-unity).  
+Used by [Unimage Unity](https://github.com/Klrohias/unimage-unity).  
 It can load `png`/`jpeg`/`webp`/`bmp`/`tga`/`gif` in to memory, and provides some simple operations.
 
 # Building
@@ -17,6 +17,7 @@ cp ./scripts/arm64-ios-bitcode.cmake $VCPKG_DIR/triplets/community/
 
 <details><summary>Or you are using PowerShell</summary>
 <p>
+  
 ```shell
 $VCPKG_DIR="/path/to/vcpkg"
 $TRIPLET="..." # triplet you want to build for
@@ -28,10 +29,11 @@ $env:ANDROID_NDK_HOME=$ANDROID_NDK_HOME
 #If it is the first time you build Unimage, add a new triplet to build with bitcode
 cp ./scripts/arm64-ios-bitcode.cmake $VCPKG_DIR/triplets/community/
 ```
+  
 </p>
 </details>
 
-** If you want to build for iOS, you need to use triplet `arm64-ios-bitcode` ** 
+**If you want to build for iOS, you need to use triplet `arm64-ios-bitcode`**  
 
 ### 2. Install dependencies
 ```shell
