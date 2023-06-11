@@ -1,0 +1,13 @@
+_unimage_clip
+_unimage_copy_from
+_unimage_copy_to_memory
+_unimage_create
+_unimage_free
+_unimage_get_buffer
+_unimage_get_error_message
+_unimage_get_format
+_unimage_get_height
+_unimage_get_width
+_unimage_load
+_unimage_load_raw
+_unimage_resize
