@@ -37,7 +37,7 @@ cp ./scripts/arm64-ios-bitcode.cmake $VCPKG_DIR/triplets/community/
 
 ### 2. Install dependencies
 ```shell
-pushd $TRIPLET
+pushd $VCPKG_DIR
 ./vcpkg install "stb:$TRIPLET"
 ./vcpkg install "libwebp:$TRIPLET"
 ./vcpkg install "libjpeg-turbo:$TRIPLET"

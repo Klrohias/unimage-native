@@ -19,7 +19,7 @@ jobs:
 
     - name: Configure environment
       run: |
-        sudo apt install -y git build-essential
+        sudo apt install -y git build-essential make
         export TRIPLET=${{env.TRIPLET}}
       
     - name: Install vcpkg and dependencies
