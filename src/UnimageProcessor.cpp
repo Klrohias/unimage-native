@@ -4,9 +4,8 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
-#include "Unimage.hpp"
-#include "./loader/StbImpl.hpp"
+#include "UnimageProcessor.hpp"
+#include "loader/StbImpl.hpp"
 #include "utils/StaticForLoop.hpp"
 #include "loader/LibJpegTurbo.hpp"
 #include "loader/WebP.hpp"
@@ -59,14 +58,14 @@ UnimageFormat getFormatByChannels(int channels)
 }
 
 
-Unimage::Unimage() = default;
+UnimageProcessor::UnimageProcessor() = default;
 
-Unimage::~Unimage()
+UnimageProcessor::~UnimageProcessor()
 {
     releaseImage();
 }
 
-void Unimage::releaseImage()
+void UnimageProcessor::releaseImage()
 {
     free(_imageBuffer);
     _imageBuffer = nullptr;
@@ -77,7 +76,7 @@ void Unimage::releaseImage()
     _format = None;
 }
 
-bool Unimage::copyFrom(Unimage* unimage)
+bool UnimageProcessor::copyFrom(UnimageProcessor* unimage)
 {
     if (unimage->_imageBuffer == nullptr)
     {
@@ -92,7 +91,7 @@ bool Unimage::copyFrom(Unimage* unimage)
     return true;
 }
 
-bool Unimage::copyToMemory(void* buffer)
+bool UnimageProcessor::copyToMemory(void* buffer)
 {
     if (!_imageBuffer)
     {
@@ -106,32 +105,32 @@ bool Unimage::copyToMemory(void* buffer)
     return true;
 }
 
-const std::string& Unimage::getErrorMessage() const
+const std::string& UnimageProcessor::getErrorMessage() const
 {
     return _errorHandler.getError();
 }
 
-int32_t Unimage::getWidth() const
+int32_t UnimageProcessor::getWidth() const
 {
     return _width;
 }
 
-int32_t Unimage::getHeight() const
+int32_t UnimageProcessor::getHeight() const
 {
     return _height;
 }
 
-UnimageFormat Unimage::getFormat() const
+UnimageFormat UnimageProcessor::getFormat() const
 {
     return _format;
 }
 
-uint8_t* Unimage::getBuffer() const
+uint8_t* UnimageProcessor::getBuffer() const
 {
     return _imageBuffer;
 }
 
-bool Unimage::resize(int32_t width, int32_t height)
+bool UnimageProcessor::resize(int32_t width, int32_t height)
 {
     if (!_imageBuffer)
     {
@@ -165,7 +164,7 @@ bool Unimage::resize(int32_t width, int32_t height)
     return true;
 }
 
-bool Unimage::clip(int32_t x, int32_t y, int32_t width, int32_t height)
+bool UnimageProcessor::clip(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     auto pixelSize = getPixelSize(_format);
     auto* newBuffer = static_cast<uint8_t*>(malloc(width * height * pixelSize));
@@ -204,7 +203,7 @@ bool Unimage::clip(int32_t x, int32_t y, int32_t width, int32_t height)
     return true;
 }
 
-void Unimage::loadRawImage(uint8_t* data, int32_t width, int32_t height, UnimageFormat format)
+void UnimageProcessor::loadRawImage(uint8_t* data, int32_t width, int32_t height, UnimageFormat format)
 {
     releaseImage();
 
@@ -218,7 +217,7 @@ void Unimage::loadRawImage(uint8_t* data, int32_t width, int32_t height, Unimage
     memcpy(_imageBuffer, data, bufferSize);
 }
 
-bool Unimage::loadImage(uint8_t* data, uint32_t length)
+bool UnimageProcessor::loadImage(uint8_t* data, uint32_t length)
 {
     if (IsJpegFormat(data, length))
     {
@@ -231,7 +230,7 @@ bool Unimage::loadImage(uint8_t* data, uint32_t length)
     return loadImageStb(data, length);
 }
 
-bool Unimage::loadImageStb(uint8_t* data, uint32_t length)
+bool UnimageProcessor::loadImageStb(uint8_t* data, uint32_t length)
 {
 
     int width = 0, height = 0, channels = 0;
@@ -262,7 +261,7 @@ bool Unimage::loadImageStb(uint8_t* data, uint32_t length)
     return true;
 }
 
-bool Unimage::loadImageJpeg(uint8_t* data, uint32_t length)
+bool UnimageProcessor::loadImageJpeg(uint8_t* data, uint32_t length)
 {
     int width, height, channels;
     uint8_t* imageData = nullptr;
@@ -283,7 +282,7 @@ bool Unimage::loadImageJpeg(uint8_t* data, uint32_t length)
     return true;
 }
 
-bool Unimage::loadImageWebP(uint8_t* data, uint32_t length)
+bool UnimageProcessor::loadImageWebP(uint8_t* data, uint32_t length)
 {
     int width, height, channels;
     uint8_t* imageData = nullptr;

@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <string>
-#include "../ErrorHandler.hpp"
+#include "utils/ErrorHandler.hpp"
 
 bool IsJpegFormat(uint8_t* data, uint32_t size);
 

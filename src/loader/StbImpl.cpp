@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <stb_image.h>
-#include "../ErrorHandler.hpp"
+#include "utils/ErrorHandler.hpp"
 
 uint8_t* stbDecodeFromMemory(uint8_t* data, uint32_t size, int* width, int* height, int* channels, ErrorHandler* errorHandler)
 {

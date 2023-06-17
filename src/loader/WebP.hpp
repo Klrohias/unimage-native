@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <string>
-#include "../ErrorHandler.hpp"
+#include "utils/ErrorHandler.hpp"
 
 bool IsWebPFormat(const uint8_t* data, uint32_t length);
 

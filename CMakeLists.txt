@@ -33,9 +33,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     set(CMAKE_C_FLAGS -fembed-bitcode)
 endif()
 
-add_library(${LIBRARY_NAME} ${LIBRARY_TYPE} src/loader/StbImpl.cpp src/loader/StbImpl.hpp src/Unimage.cpp src/Unimage.hpp src/CApi.cpp
-    src/CApi.h src/loader/WebP.cpp src/loader/WebP.hpp src/utils/StaticForLoop.hpp src/loader/LibJpegTurbo.cpp src/loader/LibJpegTurbo.hpp
-	src/ErrorHandler.cpp src/ErrorHandler.hpp)
+add_library(${LIBRARY_NAME} ${LIBRARY_TYPE} src/loader/StbImpl.cpp src/loader/StbImpl.hpp src/UnimageProcessor.cpp src/UnimageProcessor.hpp src/CBinding.cpp
+		src/CBinding.h src/loader/WebP.cpp src/loader/WebP.hpp src/utils/StaticForLoop.hpp src/loader/LibJpegTurbo.cpp src/loader/LibJpegTurbo.hpp
+		src/utils/ErrorHandler.cpp src/utils/ErrorHandler.hpp src/Library.h)
 
 add_library(klrohias::unimage ALIAS ${LIBRARY_NAME})
 
@@ -50,12 +50,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     )
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "lib")
-    # TODO: Remove prefix in next version
-endif()
-
-target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_17)
+target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_14)
 target_include_directories(${LIBRARY_NAME}
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_include_directories(${LIBRARY_NAME} PRIVATE ${Stb_INCLUDE_DIR})
@@ -85,7 +80,7 @@ install(
 install(TARGETS ${LIBRARY_NAME} EXPORT unimage-targets)
 
 install(DIRECTORY src/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/unimage
         FILES_MATCHING
         PATTERN "*.h*")
 
