@@ -53,7 +53,7 @@ endif()
 
 target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_17)
 target_include_directories(${LIBRARY_NAME}
-	PUBLIC "" $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_include_directories(${LIBRARY_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 target_link_libraries(${LIBRARY_NAME} PRIVATE ${LIBRARY_LIBJPEG_NAME})
 target_link_libraries(${LIBRARY_NAME} PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
@@ -78,7 +78,7 @@ install(
 	DESTINATION
 		${UNIMAGE_INSTALL_DST})
 
-install(TARGETS ${LIBRARY_NAME} EXPORT unimage-targets)
+install(TARGETS klrohias::unimage EXPORT unimage-targets)
 
 install(DIRECTORY src/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
