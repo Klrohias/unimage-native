@@ -23,7 +23,6 @@ set(LIBRARY_LIBJPEG_NAME libjpeg-turbo::turbojpeg-static)
 set(LIBRARY_TYPE SHARED)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(LIBRARY_NAME libUnimage)
     set(LIBRARY_LIBJPEG_NAME libjpeg-turbo::turbojpeg)
 endif()
 if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
@@ -49,6 +48,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
         POST_BUILD
         COMMAND sh ${CMAKE_SOURCE_DIR}/scripts/ios-link.sh ${VCPKG_INSTALLED_DIR}/../
     )
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "lib")
+    # TODO: Remove prefix in next version
 endif()
 
 target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_17)
@@ -78,7 +82,7 @@ install(
 	DESTINATION
 		${UNIMAGE_INSTALL_DST})
 
-install(TARGETS klrohias::unimage EXPORT unimage-targets)
+install(TARGETS ${LIBRARY_NAME} EXPORT unimage-targets)
 
 install(DIRECTORY src/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
