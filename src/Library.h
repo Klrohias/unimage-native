@@ -8,7 +8,7 @@
 #if defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS)
 #ifdef UNIMAGE_BUILD
 #define UNIMAGE_API __declspec(dllexport)
-#elif
+#else
 #define UNIMAGE_API __declspec(dllimport)
 #endif
 #else
