@@ -1,0 +1,56 @@
+name: ci-darwin
+
+on: workflow_dispatch
+
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-darwin:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install vcpkg and dependencies
+      run: |
+        git clone https://github.com/microsoft/vcpkg
+        pushd vcpkg
+        # Install vcpkg
+        echo "Install vcpkg"
+        ./bootstrap-vcpkg.sh
+
+        cp ${{github.workspace}}/scripts/arm64-ios-bitcode.cmake ${{github.workspace}}/vcpkg/triplets/community/
+
+        # Install dependencies
+        TRIPLETS="x64-osx arm64-ios-bitcode"
+
+        for TRIPLET in $TRIPLETS
+        do
+          ./vcpkg install "libjpeg-turbo:$TRIPLET"
+          ./vcpkg install "stb:$TRIPLET"
+          ./vcpkg install "libwebp:$TRIPLET"
+        done
+
+        popd
+    - name: Configure and build
+      run: |
+        TRIPLET='x64-osx'
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+        TRIPLET='arm64-ios-bitcode'
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+    - name: Upload Artifact (x64-osx)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-x64-osx.dylib
+        path: ${{github.workspace}}/build-x64-osx/libUnimage.dylib
+
+    - name: Upload Artifact (arm64-ios-bitcode)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-arm64-ios-bitcode.a
+        path: ${{github.workspace}}/build-arm64-ios-bitcode/libUnimage.a

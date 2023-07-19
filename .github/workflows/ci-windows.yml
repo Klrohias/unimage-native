@@ -1,0 +1,50 @@
+name: ci-win
+
+on: workflow_dispatch
+
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install vcpkg and dependencies, then configure and build it
+      run: |
+        git clone https://github.com/microsoft/vcpkg
+        pushd vcpkg
+        # Install vcpkg
+        echo "Install vcpkg"
+        ./bootstrap-vcpkg.bat
+        # Install dependencies
+        $TRIPLETS='x64-windows','x86-windows';
+        foreach ($TRIPLET in $TRIPLETS) {
+          echo "Install dependencies for $TRIPLET"
+          ./vcpkg install "libjpeg-turbo:$TRIPLET"
+          ./vcpkg install "stb:$TRIPLET"
+          ./vcpkg install "libwebp:$TRIPLET"
+        }
+        ./vcpkg integrate install
+        popd
+
+        $TRIPLET="x64-windows";
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET "-DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}\vcpkg\scripts\buildsystems\vcpkg.cmake"
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+        $TRIPLET="x86-windows";
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET "-DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}\vcpkg\scripts\buildsystems\vcpkg.cmake"
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+    - name: Upload Artifact (x64-windows)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-x64-windows.dll
+        path: ${{github.workspace}}/build-x86-android/libUnimage.dll
+
+    - name: Upload Artifact (x86-windows)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-x86-windows.dll
+        path: ${{github.workspace}}/build-x86-windows/libUnimage.dll
+
+

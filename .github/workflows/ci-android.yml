@@ -1,0 +1,95 @@
+name: ci-android
+
+on: workflow_dispatch
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure environment
+      run: |
+        sudo apt install -y git build-essential
+
+    - name: Install NDK
+      uses: nttld/setup-ndk@v1
+      id: ndk-install
+      with:
+        ndk-version: r24
+        local-cache: true
+
+    - name: Install vcpkg and dependencies
+      run: |
+        export ANDROID_NDK_HOME="${{ steps.ndk-install.outputs.ndk-path }}"
+
+        git clone https://github.com/microsoft/vcpkg
+        pushd vcpkg
+        # Install vcpkg
+        echo "Install vcpkg"
+        ./bootstrap-vcpkg.sh
+
+        # Install dependencies
+        TRIPLETS="arm-android arm64-android x86-android x64-android"
+
+        for TRIPLET in $TRIPLETS
+        do
+          echo "Install dependencies for $TRIPLET"
+          ./vcpkg install "libjpeg-turbo:$TRIPLET"
+          ./vcpkg install "stb:$TRIPLET"
+          ./vcpkg install "libwebp:$TRIPLET"
+        done
+
+        popd
+
+    - name: Build (Android)
+      run: |
+        CFG_FLAGS=('-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}' '-DVCPKG_CMAKE_SYSTEM_NAME=Android' '-DCMAKE_SYSTEM_NAME=Android' '-DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake' '-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ steps.ndk-install.outputs.ndk-path }}/build/cmake/android.toolchain.cmake' '-DCMAKE_MAKE_PROGRAM=${{ steps.ndk-install.outputs.ndk-path }}/prebuilt/linux-x86_64/bin/make' '-G' 'Unix Makefiles')
+
+        TRIPLET='arm-android'
+        ABI='armeabi-v7a'
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DANDROID_ABI=$ABI "${CFG_FLAGS[@]}"
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+        TRIPLET='arm64-android'
+        ABI='arm64-v8a'
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DANDROID_ABI=$ABI "${CFG_FLAGS[@]}"
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+        TRIPLET='x86-android'
+        ABI='x86'
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DANDROID_ABI=$ABI "${CFG_FLAGS[@]}"
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+        TRIPLET='x64-android'
+        ABI='x86_64'
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DANDROID_ABI=$ABI "${CFG_FLAGS[@]}"
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+
+    - name: Upload Artifact (arm-android)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-arm-android.so
+        path: ${{github.workspace}}/build-arm-android/libUnimage.so
+
+    - name: Upload Artifact (arm64-android)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-arm64-android.so
+        path: ${{github.workspace}}/build-arm64-android/libUnimage.so
+
+    - name: Upload Artifact (x86-android)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-x86-android.so
+        path: ${{github.workspace}}/build-x86-android/libUnimage.so
+
+    - name: Upload Artifact (x64-android)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-x64-android.so
+        path: ${{github.workspace}}/build-x64-android/libUnimage.so
