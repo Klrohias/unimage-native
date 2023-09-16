@@ -26,22 +26,26 @@ jobs:
         ./bootstrap-vcpkg.sh
 
         # Install dependencies
-        TRIPLET="x64-linux"
-        ./vcpkg install "libjpeg-turbo:$TRIPLET"
-        ./vcpkg install "stb:$TRIPLET"
-        ./vcpkg install "libwebp:$TRIPLET"
+        TRIPLETS="x64-linux arm64-linux"
+
+        for TRIPLET in $TRIPLETS
+        do
+          echo "Install dependencies for $TRIPLET"
+          ./vcpkg install "libjpeg-turbo:$TRIPLET"
+          ./vcpkg install "stb:$TRIPLET"
+          ./vcpkg install "libwebp:$TRIPLET"
+        done
 
         popd
 
-    - name: Configure CMake
+    - name: Configure and build
       run: |
         TRIPLET="x64-linux"
         cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
-
-    - name: Build
-      run: |
-        TRIPLET="x64-linux"
+        TRIPLET="arm64-linux"
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifact (x64-linux)
@@ -49,3 +53,9 @@ jobs:
       with:
         name: libUnimage-x64-linux.so
         path: ${{github.workspace}}/build-x64-linux/libUnimage.so
+        
+    - name: Upload Artifact (arm64-linux)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-arm64-linux.so
+        path: ${{github.workspace}}/build-arm64-linux/libUnimage.so
