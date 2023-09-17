@@ -12,35 +12,46 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install vcpkg and dependencies, then configure and build it
+    - name: Build x64-windows
       run: |
         $VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT;
+        $TRIPLET='x64-windows';
 
-        # Install dependencies and build
-        $TRIPLETS='x64-windows';
-        foreach ($TRIPLET in $TRIPLETS) {
-          echo "Install dependencies for $TRIPLET"
-          pushd $VCPKG_ROOT
+        pushd $VCPKG_ROOT
           ./vcpkg install "libjpeg-turbo:$TRIPLET"
           ./vcpkg install "stb:$TRIPLET"
           ./vcpkg install "libwebp:$TRIPLET"
-          popd
+        popd
 
-          echo "Build for $TRIPLET"
-          cmake -B ${{github.workspace}}/build-$TRIPLET "-DVCPKG_TARGET_TRIPLET=$TRIPLET" "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-          cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
-        }
+        $BUILD_ROOT="${{github.workspace}}/build-$TRIPLET";
+        cmake -B $BUILD_ROOT -A x64 "-DVCPKG_TARGET_TRIPLET=$TRIPLET" "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake --build $BUILD_ROOT --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifact (x64-windows)
       uses: actions/upload-artifact@v3.1.2
       with:
         name: libUnimage-x64-windows.dll
-        path: ${{github.workspace}}/build-x64-windows/libUnimage.dll
+        path: ${{github.workspace}}/build-x64-windows/Release/Unimage.dll
+
+    - name: Build x86-windows
+      run: |
+        $VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT;
+        $TRIPLET='x86-windows';
+
+        pushd $VCPKG_ROOT
+          ./vcpkg install "libjpeg-turbo:$TRIPLET"
+          ./vcpkg install "stb:$TRIPLET"
+          ./vcpkg install "libwebp:$TRIPLET"
+        popd
+
+        $BUILD_ROOT="${{github.workspace}}/build-$TRIPLET";
+        cmake -B $BUILD_ROOT -A Win32 "-DVCPKG_TARGET_TRIPLET=$TRIPLET" "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake --build $BUILD_ROOT --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifact (x86-windows)
       uses: actions/upload-artifact@v3.1.2
       with:
         name: libUnimage-x86-windows.dll
-        path: ${{github.workspace}}/build-x86-windows/libUnimage.dll
+        path: ${{github.workspace}}/build-x86-windows/Release/Unimage.dll
 
 
