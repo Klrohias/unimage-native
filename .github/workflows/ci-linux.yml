@@ -19,14 +19,10 @@ jobs:
 
     - name: Install vcpkg and dependencies
       run: |
-        git clone https://github.com/microsoft/vcpkg
-        pushd vcpkg
-        # Install vcpkg
-        echo "Install vcpkg"
-        ./bootstrap-vcpkg.sh
-
         # Install dependencies
         TRIPLETS="x64-linux arm64-linux"
+
+        pushd $VCPKG_INSTALLATION_ROOT
 
         for TRIPLET in $TRIPLETS
         do
@@ -41,11 +37,11 @@ jobs:
     - name: Configure and build
       run: |
         TRIPLET="x64-linux"
-        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
         TRIPLET="arm64-linux"
-        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifact (x64-linux)

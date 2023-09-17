@@ -22,14 +22,10 @@ jobs:
 
     - name: Install vcpkg and dependencies
       run: |
-        git clone https://github.com/microsoft/vcpkg
-        pushd vcpkg
-        # Install vcpkg
-        echo "Install vcpkg"
-        ./bootstrap-vcpkg.sh
-
         # Install dependencies
         TRIPLETS="arm-neon-android arm64-android x86-android x64-android"
+
+        pushd $VCPKG_INSTALLATION_ROOT
 
         for TRIPLET in $TRIPLETS
         do
@@ -43,7 +39,7 @@ jobs:
 
     - name: Build (Android)
       run: |
-        CFG_FLAGS=('-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}' '-DVCPKG_CMAKE_SYSTEM_NAME=Android' '-DCMAKE_SYSTEM_NAME=Android' '-DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake' "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake")
+        CFG_FLAGS=('-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}' '-DVCPKG_CMAKE_SYSTEM_NAME=Android' '-DCMAKE_SYSTEM_NAME=Android' "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake")
 
         TRIPLET='arm-neon-android'
         ABI='armeabi-v7a'
