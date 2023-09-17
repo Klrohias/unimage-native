@@ -17,7 +17,7 @@ jobs:
         $VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT;
 
         # Install dependencies and build
-        $TRIPLETS='x64-windows';
+        $TRIPLETS='x64-windows','x86-windows';
         foreach ($TRIPLET in $TRIPLETS) {
           echo "Install dependencies for $TRIPLET"
           pushd $VCPKG_ROOT
@@ -27,7 +27,7 @@ jobs:
           popd
 
           echo "Build for $TRIPLET"
-          cmake -B ${{github.workspace}}/build-$TRIPLET -A x64 -DVCPKG_TARGET_TRIPLET=$TRIPLET "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+          cmake -B ${{github.workspace}}/build-$TRIPLET "-DVCPKG_TARGET_TRIPLET=$TRIPLET" "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
           cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
         }
 
