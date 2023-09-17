@@ -17,7 +17,7 @@ jobs:
         $VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT;
 
         # Install dependencies and build
-        $TRIPLETS='x64-windows','x86-windows';
+        $TRIPLETS='x64-windows';
         foreach ($TRIPLET in $TRIPLETS) {
           echo "Install dependencies for $TRIPLET"
           pushd $VCPKG_ROOT
