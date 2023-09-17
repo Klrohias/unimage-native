@@ -14,16 +14,12 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install vcpkg and dependencies
       run: |
-        git clone https://github.com/microsoft/vcpkg
-        pushd vcpkg
-        # Install vcpkg
-        echo "Install vcpkg"
-        ./bootstrap-vcpkg.sh
-
-        cp ${{github.workspace}}/scripts/arm64-ios-bitcode.cmake ${{github.workspace}}/vcpkg/triplets/community/
+        cp ${{github.workspace}}/scripts/arm64-ios-bitcode.cmake $VCPKG_INSTALLATION_ROOT/triplets/community/
 
         # Install dependencies
         TRIPLETS="x64-osx arm64-ios-bitcode"
+
+        pushd $VCPKG_INSTALLATION_ROOT
 
         for TRIPLET in $TRIPLETS
         do
@@ -36,11 +32,11 @@ jobs:
     - name: Configure and build
       run: |
         TRIPLET='x64-osx'
-        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
         TRIPLET='arm64-ios-bitcode'
-        cmake -B ${{github.workspace}}/build-$TRIPLET -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64
+        cmake -B ${{github.workspace}}/build-$TRIPLET -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifact (x64-osx)

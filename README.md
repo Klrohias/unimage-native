@@ -1,4 +1,8 @@
 # Unimage Native
+[![ci-win](https://github.com/Klrohias/unimage-native/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/Klrohias/unimage-native/actions/workflows/ci-windows.yml)
+[![ci-linux](https://github.com/Klrohias/unimage-native/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/Klrohias/unimage-native/actions/workflows/ci-linux.yml)
+[![ci-android](https://github.com/Klrohias/unimage-native/actions/workflows/ci-android.yml/badge.svg)](https://github.com/Klrohias/unimage-native/actions/workflows/ci-android.yml)
+[![ci-darwin](https://github.com/Klrohias/unimage-native/actions/workflows/ci-darwin.yml/badge.svg)](https://github.com/Klrohias/unimage-native/actions/workflows/ci-darwin.yml)  
 Used by [Unimage Unity](https://github.com/Klrohias/unimage-unity).  
 It can load `png`/`jpeg`/`webp`/`bmp`/`tga`/`gif` in to memory, and provides some simple operations.
 

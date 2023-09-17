@@ -8,33 +8,24 @@ env:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
+    env:
+      ANDROID_NDK: "/usr/local/lib/android/sdk/ndk/24.0.8215888"
+      ANDROID_NDK_HOME: "/usr/local/lib/android/sdk/ndk/24.0.8215888"
+      ANDROID_NDK_LATEST_HOME: "/usr/local/lib/android/sdk/ndk/24.0.8215888"
+      ANDROID_NDK_ROOT: "/usr/local/lib/android/sdk/ndk/24.0.8215888"
     steps:
     - uses: actions/checkout@v3
 
     - name: Configure environment
       run: |
-        sudo apt install -y git build-essential
-
-    - name: Install NDK
-      uses: nttld/setup-ndk@v1
-      id: ndk-install
-      with:
-        ndk-version: r24
-        local-cache: true
+        sudo apt install -y git build-essential ninja-build
 
     - name: Install vcpkg and dependencies
       run: |
-        export ANDROID_NDK_HOME="${{ steps.ndk-install.outputs.ndk-path }}"
-
-        git clone https://github.com/microsoft/vcpkg
-        pushd vcpkg
-        # Install vcpkg
-        echo "Install vcpkg"
-        ./bootstrap-vcpkg.sh
-
         # Install dependencies
-        TRIPLETS="arm-android arm64-android x86-android x64-android"
+        TRIPLETS="arm-neon-android arm64-android x86-android x64-android"
+
+        pushd $VCPKG_INSTALLATION_ROOT
 
         for TRIPLET in $TRIPLETS
         do
@@ -48,9 +39,9 @@ jobs:
 
     - name: Build (Android)
       run: |
-        CFG_FLAGS=('-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}' '-DVCPKG_CMAKE_SYSTEM_NAME=Android' '-DCMAKE_SYSTEM_NAME=Android' '-DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake' '-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ steps.ndk-install.outputs.ndk-path }}/build/cmake/android.toolchain.cmake' '-DCMAKE_MAKE_PROGRAM=${{ steps.ndk-install.outputs.ndk-path }}/prebuilt/linux-x86_64/bin/make' '-G' 'Unix Makefiles')
+        CFG_FLAGS=('-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}' '-DVCPKG_CMAKE_SYSTEM_NAME=Android' '-DCMAKE_SYSTEM_NAME=Android' "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake")
 
-        TRIPLET='arm-android'
+        TRIPLET='arm-neon-android'
         ABI='armeabi-v7a'
         cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DANDROID_ABI=$ABI "${CFG_FLAGS[@]}"
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
@@ -73,8 +64,8 @@ jobs:
     - name: Upload Artifact (arm-android)
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: libUnimage-arm-android.so
-        path: ${{github.workspace}}/build-arm-android/libUnimage.so
+        name: libUnimage-arm-neon-android.so
+        path: ${{github.workspace}}/build-arm-neon-android/libUnimage.so
 
     - name: Upload Artifact (arm64-android)
       uses: actions/upload-artifact@v3.1.2
