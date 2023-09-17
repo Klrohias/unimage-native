@@ -20,7 +20,7 @@ jobs:
     - name: Install vcpkg and dependencies
       run: |
         # Install dependencies
-        TRIPLETS="x64-linux arm64-linux"
+        TRIPLETS="x64-linux"
 
         pushd $VCPKG_INSTALLATION_ROOT
 
@@ -40,18 +40,8 @@ jobs:
         cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
 
-        TRIPLET="arm64-linux"
-        cmake -B ${{github.workspace}}/build-$TRIPLET -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
-        cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
-
     - name: Upload Artifact (x64-linux)
       uses: actions/upload-artifact@v3.1.2
       with:
         name: libUnimage-x64-linux.so
         path: ${{github.workspace}}/build-x64-linux/libUnimage.so
-        
-    - name: Upload Artifact (arm64-linux)
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: libUnimage-arm64-linux.so
-        path: ${{github.workspace}}/build-arm64-linux/libUnimage.so
