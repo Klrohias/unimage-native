@@ -7,7 +7,7 @@ PACKAGES_DIR=$VCPKG_DIR/packages
 
 TRIPLET=arm64-ios-bitcode
 
-echo "[iOS-build] ===== Unimage iOS Post-build Script ====="
+echo "[iOS-build] ===== Unimage Unity iOS Post-build Script ====="
 echo "[iOS-build] VCPKG_DIR: $VCPKG_DIR"
 echo "[iOS-build] OUTPUT_DIR: $OUTPUT_DIR"
 echo "[iOS-build] SCRIPT_DIR: $SCRIPT_DIR"

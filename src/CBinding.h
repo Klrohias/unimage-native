@@ -12,20 +12,32 @@ extern "C" {
 #include <stdint.h>
 #include "Library.h"
 
-UNIMAGE_API void* unimage_processor_create();
-UNIMAGE_API void unimage_processor_free(void* handle);
+#define CBINDING_TYPED_PTR(TYPE) void*
+#define CBINDING_METHOD(RETURN_VALUE, CLASS_NAME, METHOD_NAME, ...) UNIMAGE_API RETURN_VALUE UNIMAGE_##CLASS_NAME##_##METHOD_NAME \
+    (__VA_ARGS__)
+#define CBINDING_BOOLEAN uint8_t
+#define CBINDING_CSTRING const char*
+#define CBINDING_ENUM_U8(TYPE) uint8_t
 
-UNIMAGE_API void unimage_processor_load_raw(void* handle, uint8_t* data, int32_t width, int32_t height, uint8_t format);
-UNIMAGE_API uint8_t unimage_processor_load(void* handle, uint8_t* data, uint32_t length);
-UNIMAGE_API int32_t unimage_processor_get_width(void* handle);
-UNIMAGE_API int32_t unimage_processor_get_height(void* handle);
-UNIMAGE_API uint8_t unimage_processor_get_format(void* handle);
-UNIMAGE_API uint8_t unimage_processor_copy_to_memory(void* handle, void* buffer);
-UNIMAGE_API uint8_t unimage_processor_resize(void* handle, int32_t width, int32_t height);
-UNIMAGE_API const char* unimage_processor_get_error_message(void* handle);
-UNIMAGE_API uint8_t* unimage_processor_get_buffer(void* handle);
-UNIMAGE_API uint8_t unimage_processor_copy_from(void* handle, void* unimage);
-UNIMAGE_API uint8_t unimage_processor_clip(void* handle, int32_t x, int32_t y, int32_t width, int32_t height);
+CBINDING_METHOD(CBINDING_TYPED_PTR(UnimageProcess), UnimageProcessor, Create);
+CBINDING_METHOD(void, UnimageProcessor, Free, CBINDING_TYPED_PTR(UnimageProcessor) handle);
+CBINDING_METHOD(void, UnimageProcessor, LoadRaw, CBINDING_TYPED_PTR(UnimageProcessor) handle, uint8_t* data,
+                int32_t width, int32_t height, CBINDING_ENUM_U8(UnimageFormat) format);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, Load, CBINDING_TYPED_PTR(UnimageProcessor) handle, uint8_t* data,
+                uint32_t length);
+CBINDING_METHOD(uint32_t, UnimageProcessor, GetWidth, CBINDING_TYPED_PTR(UnimageProcessor) handle);
+CBINDING_METHOD(uint32_t, UnimageProcessor, GetHeight, CBINDING_TYPED_PTR(UnimageProcessor) handle);
+CBINDING_METHOD(uint8_t, UnimageProcessor, GetFormat, CBINDING_TYPED_PTR(UnimageProcessor) handle);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, CopyToMemory, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                void* buffer);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, Resize, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                int32_t width, int32_t height);
+CBINDING_METHOD(CBINDING_CSTRING, UnimageProcessor, GetErrorMessage, CBINDING_TYPED_PTR(UnimageProcessor) handle);
+CBINDING_METHOD(uint8_t*, UnimageProcessor, GetBuffer, CBINDING_TYPED_PTR(UnimageProcessor) handle);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, CopyFrom, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                CBINDING_TYPED_PTR(UnimageProcessor) other);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, Clip, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                int32_t x, int32_t y, int32_t width, int32_t height);
 
 #ifdef __cplusplus
 };

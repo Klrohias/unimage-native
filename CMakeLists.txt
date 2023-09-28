@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
-set(UNIMAGE_VERSION 0.1.3)
+# Package
+set(UNIMAGE_VERSION 0.1.5)
 project(Unimage
     VERSION ${UNIMAGE_VERSION}
     DESCRIPTION "A wrapper of libjpeg-turbo, libwebp, stb."
@@ -12,51 +13,53 @@ include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# Dependencies
 find_package(Stb REQUIRED)
 find_package(libjpeg-turbo CONFIG REQUIRED)
 find_package(WebP CONFIG REQUIRED)
 
-add_compile_definitions(UNIMAGE_BUILD)
+# Config
+if (BUILD_SHARED_LIBS AND WIN32)
+	add_compile_definitions(UNIMAGE_BUILD)
+endif()
 
-set(LIBRARY_NAME Unimage)
-set(LIBRARY_LIBJPEG_NAME libjpeg-turbo::turbojpeg-static)
-set(LIBRARY_TYPE SHARED)
+set(LINK_LIBJPEG_NAME libjpeg-turbo::turbojpeg-static)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(LIBRARY_LIBJPEG_NAME libjpeg-turbo::turbojpeg)
-endif()
-if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    set(LIBRARY_TYPE STATIC)
-    
-    # enable bitcode
-    set(CMAKE_CXX_FLAGS -fembed-bitcode)
-    set(CMAKE_C_FLAGS -fembed-bitcode)
+    set(LINK_LIBJPEG_NAME libjpeg-turbo::turbojpeg)
 endif()
 
-add_library(${LIBRARY_NAME} ${LIBRARY_TYPE} src/loader/StbImpl.cpp src/loader/StbImpl.hpp src/UnimageProcessor.cpp src/UnimageProcessor.hpp src/CBinding.cpp
+if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+	set(BUILD_SHARED_LIBS no)
+endif()
+
+# Compile
+add_library(Unimage src/loader/StbImpl.cpp src/loader/StbImpl.hpp src/UnimageProcessor.cpp src/UnimageProcessor.hpp src/CBinding.cpp
 		src/CBinding.h src/loader/WebP.cpp src/loader/WebP.hpp src/utils/StaticForLoop.hpp src/loader/LibJpegTurbo.cpp src/loader/LibJpegTurbo.hpp
 		src/utils/ErrorHandler.cpp src/utils/ErrorHandler.hpp src/Library.h)
 
-add_library(klrohias::unimage ALIAS ${LIBRARY_NAME})
+add_library(klrohias::unimage ALIAS Unimage)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    # link
-    message("Building for iOS")
-    
+# Link
+if (UNIMAGE_UNITY AND (${CMAKE_SYSTEM_NAME} MATCHES "iOS"))
+	message("Enable static linking for iOS...")
     add_custom_command(
-        TARGET ${LIBRARY_NAME}
+        TARGET Unimage
         POST_BUILD
-        COMMAND sh ${CMAKE_SOURCE_DIR}/scripts/ios-link.sh ${VCPKG_INSTALLED_DIR}/../
+        COMMAND sh ${CMAKE_SOURCE_DIR}/scripts/unity-ios-link.sh ${VCPKG_INSTALLED_DIR}/../
     )
 endif()
 
-target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_14)
-target_include_directories(${LIBRARY_NAME}
+target_compile_features(Unimage PUBLIC cxx_std_14)
+target_include_directories(Unimage
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_include_directories(${LIBRARY_NAME} PRIVATE ${Stb_INCLUDE_DIR})
-target_link_libraries(${LIBRARY_NAME} PRIVATE ${LIBRARY_LIBJPEG_NAME})
-target_link_libraries(${LIBRARY_NAME} PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
 
+# Dependencies
+target_include_directories(Unimage PRIVATE ${Stb_INCLUDE_DIR})
+target_link_libraries(Unimage PRIVATE ${LINK_LIBJPEG_NAME})
+target_link_libraries(Unimage PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
+
+# Package Config
 set(UNIMAGE_CONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR}/unimage-config.cmake)
 set(UNIMAGE_INSTALL_DST ${CMAKE_INSTALL_DATADIR}/unimage)
 configure_package_config_file(scripts/unimage-config.cmake.in
@@ -77,7 +80,7 @@ install(
 	DESTINATION
 		${UNIMAGE_INSTALL_DST})
 
-install(TARGETS ${LIBRARY_NAME} EXPORT unimage-targets)
+install(TARGETS Unimage EXPORT unimage-targets)
 
 install(DIRECTORY src/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/unimage

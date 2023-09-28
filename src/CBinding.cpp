@@ -5,69 +5,64 @@
 #include "CBinding.h"
 #include "UnimageProcessor.hpp"
 
-#define _TypedHandle reinterpret_cast<UnimageProcessor *>(handle)
+#define TypedHandle_ (reinterpret_cast<UnimageProcessor *>(handle))
 
-void* unimage_processor_create()
-{
+CBINDING_METHOD(CBINDING_TYPED_PTR(UnimageProcess), UnimageProcessor, Create) {
     return new UnimageProcessor;
 }
 
-uint8_t unimage_processor_resize(void* handle, int32_t width, int32_t height)
-{
-    return _TypedHandle->resize(width, height);
+CBINDING_METHOD(void, UnimageProcessor, Free, CBINDING_TYPED_PTR(UnimageProcessor) handle) {
+    delete TypedHandle_;
 }
 
-uint8_t unimage_processor_copy_to_memory(void* handle, void* buffer)
-{
-    return _TypedHandle->copyToMemory(buffer);
+CBINDING_METHOD(void, UnimageProcessor, LoadRaw, CBINDING_TYPED_PTR(UnimageProcessor) handle, uint8_t* data,
+                int32_t width, int32_t height, CBINDING_ENUM_U8(UnimageFormat) format) {
+    TypedHandle_->loadRawImage(data, width, height, static_cast<UnimageFormat>(format));
 }
 
-uint8_t unimage_processor_get_format(void* handle)
-{
-    return _TypedHandle->getFormat();
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, Load, CBINDING_TYPED_PTR(UnimageProcessor) handle, uint8_t* data,
+                uint32_t length) {
+    return TypedHandle_->loadImage(data, length);
 }
 
-int32_t unimage_processor_get_height(void* handle)
-{
-    return _TypedHandle->getHeight();
+CBINDING_METHOD(uint32_t, UnimageProcessor, GetWidth, CBINDING_TYPED_PTR(UnimageProcessor) handle) {
+    return TypedHandle_->getWidth();
 }
 
-int32_t unimage_processor_get_width(void* handle)
-{
-    return _TypedHandle->getWidth();
+CBINDING_METHOD(uint32_t, UnimageProcessor, GetHeight, CBINDING_TYPED_PTR(UnimageProcessor) handle) {
+    return TypedHandle_->getHeight();
 }
 
-void unimage_processor_free(void* handle)
-{
-    delete _TypedHandle;
+CBINDING_METHOD(uint8_t, UnimageProcessor, GetFormat, CBINDING_TYPED_PTR(UnimageProcessor) handle) {
+    return TypedHandle_->getFormat();
 }
 
-void unimage_processor_load_raw(void* handle, uint8_t* data, int32_t width, int32_t height, uint8_t format)
-{
-    _TypedHandle->loadRawImage(data, width, height, static_cast<UnimageFormat>(format));
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, CopyToMemory, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                void* buffer) {
+    return TypedHandle_->copyToMemory(buffer);
 }
 
-uint8_t unimage_processor_load(void* handle, uint8_t* data, uint32_t length)
-{
-    return _TypedHandle->loadImage(data, length);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, Resize, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                int32_t width, int32_t height) {
+    return TypedHandle_->resize(width, height);
 }
 
-const char* unimage_processor_get_error_message(void* handle)
-{
-    return _TypedHandle->getErrorMessage().c_str();
+CBINDING_METHOD(CBINDING_CSTRING, UnimageProcessor, GetErrorMessage, CBINDING_TYPED_PTR(UnimageProcessor) handle) {
+    return TypedHandle_->getErrorMessage().c_str();
 }
 
-uint8_t* unimage_processor_get_buffer(void* handle)
-{
-    return _TypedHandle->getBuffer();
+CBINDING_METHOD(uint8_t*, UnimageProcessor, GetBuffer, CBINDING_TYPED_PTR(UnimageProcessor) handle) {
+    return TypedHandle_->getBuffer();
 }
 
-uint8_t unimage_processor_copy_from(void* handle, void* unimage)
-{
-    return _TypedHandle->copyFrom(static_cast<UnimageProcessor*>(unimage));
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, CopyFrom, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                CBINDING_TYPED_PTR(UnimageProcessor) other) {
+    return TypedHandle_->copyFrom(static_cast<UnimageProcessor*>(other));
 }
 
-uint8_t unimage_processor_clip(void* handle, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-    return _TypedHandle->clip(x, y, width, height);
+CBINDING_METHOD(CBINDING_BOOLEAN, UnimageProcessor, Clip, CBINDING_TYPED_PTR(UnimageProcessor) handle,
+                int32_t x, int32_t y, int32_t width, int32_t height) {
+    return TypedHandle_->clip(x, y, width, height);
 }
+
+#undef TypedHandle_

@@ -38,6 +38,10 @@ jobs:
         TRIPLET='arm64-ios-bitcode'
         cmake -B ${{github.workspace}}/build-$TRIPLET -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64
         cmake --build ${{github.workspace}}/build-$TRIPLET --config ${{env.BUILD_TYPE}}
+        
+        TRIPLET='arm64-ios-bitcode'
+        cmake -B ${{github.workspace}}/build-$TRIPLET-unity -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVCPKG_TARGET_TRIPLET=$TRIPLET -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DUNIMAGE_UNITY=true
+        cmake --build ${{github.workspace}}/build-$TRIPLET-unity --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifact (x64-osx)
       uses: actions/upload-artifact@v3.1.2
@@ -50,3 +54,9 @@ jobs:
       with:
         name: libUnimage-arm64-ios-bitcode.a
         path: ${{github.workspace}}/build-arm64-ios-bitcode/libUnimage.a
+
+    - name: Upload Artifact (arm64-ios-bitcode) (unity)
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: libUnimage-arm64-ios-bitcode-unity.a
+        path: ${{github.workspace}}/build-arm64-ios-bitcode-unity/libUnimage.a
